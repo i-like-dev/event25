@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025中秋烤肉簽到系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFPtv-eValmarH9g96Ef-OdbwdYger6tE",
+            authDomain: "x-tw-455de.firebaseapp.com",
+            projectId: "x-tw-455de",
+            storageBucket: "x-tw-455de.firebasestorage.app",
+            messagingSenderId: "843984136113",
+            appId: "1:843984136113:web:209b33f8d74ee3f2813f90",
+            measurementId: "G-H3FYWYZKQZ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // 將Firebase實例暴露到全域
+        window.firebaseDB = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreOnSnapshot = onSnapshot;
+    </script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .gradient-bg {
+            background: #ffffff;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .success-animation {
+            animation: successPulse 0.6s ease-in-out;
+        }
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .barcode-scanner {
+            border: 2px dashed #4f46e5;
+            background: rgba(79, 70, 229, 0.05);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 標題 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🌕 2025中秋烤肉</h1>
+            <p class="text-xl text-gray-600">簽到領贈品系統</p>
+        </div>
+
+        <!-- 簽到區域 -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">👥 簽到名單</h2>
+            
+            <!-- 大人名單 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    👨‍👩‍👧‍👦 大人 (青茶 x2，需刷流水號)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="adultList">
+                    <!-- 大人名單將由JavaScript生成 -->
+                </div>
+            </div>
+
+            <!-- 小孩名單 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    👶 小孩 (餅乾 x2，商品條碼：2025-PROD-COOK-4515)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="childList">
+                    <!-- 小孩名單將由JavaScript生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 條碼掃描區域 -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">📱 條碼掃描核銷</h2>
+            <div class="barcode-scanner rounded-lg p-6 text-center">
+                <div class="mb-4">
+                    <svg class="w-16 h-16 mx-auto text-indigo-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"></path>
+                    </svg>
+                    <p class="text-gray-600">掃描流水號條碼進行簽到或領取贈品</p>
+                    <p class="text-sm text-gray-500 mt-1">大人：刷流水號簽到，再刷一次領青茶 | 小孩：刷流水號簽到，再刷商品條碼2025-PROD-COOK-4515領餅乾</p>
+                </div>
+                <input type="text" id="barcodeInput" placeholder="輸入條碼 (如：2025-0001-DING-LIWEN) 或商品條碼 2025-PROD-COOK-4515" 
+                       class="w-full max-w-md mx-auto px-4 py-3 border-2 border-gray-300 rounded-lg text-center text-lg focus:border-indigo-500 focus:outline-none">
+                <button onclick="scanBarcode()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    🔍 掃描核銷
+                </button>
+            </div>
+        </div>
+
+        <!-- 統計資訊 -->
+        <div class="bg-white rounded-2xl card-shadow p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">📊 統計資訊</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="checkedInCount">0</div>
+                    <div class="text-sm text-gray-600">已簽到</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600" id="teaRedeemed">0</div>
+                    <div class="text-sm text-gray-600">青茶已領</div>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600" id="cookieRedeemed">0</div>
+                    <div class="text-sm text-gray-600">餅乾已領</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600" id="totalPeople">9</div>
+                    <div class="text-sm text-gray-600">總人數</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Firebase 測試區域 -->
+        <div class="bg-white rounded-2xl card-shadow p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">☁️ Firebase 雲端狀態</h2>
+            <div class="text-center">
+                <div id="firebaseStatus" class="mb-4 p-4 rounded-lg bg-gray-100">
+                    <div class="text-lg font-semibold text-gray-700">連線狀態：檢查中...</div>
+                    <div class="text-sm text-gray-500 mt-1">正在測試Firebase連線</div>
+                </div>
+                <button onclick="testFirebase()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    🧪 測試Firebase連線
+                </button>
+                <button onclick="viewFirebaseData()" class="ml-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    👁️ 查看雲端資料
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知彈窗 -->
+    <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300">
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        // 人員資料 - 每個人都有專屬條碼
+        const people = {
+            adults: [
+                { name: '丁立文', barcode: '2025-0001-DING-LIWEN', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '丁維德', barcode: '2025-0002-DING-WEIDE', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '丁維泰', barcode: '2025-0003-DING-WEITAI', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '劉佳禎', barcode: '2025-0004-LIU-JIAZHEN', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '劉異曲', barcode: '2025-0005-LIU-YIQU', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '丁維廉', barcode: '2025-0006-DING-WEILIAN', checkedIn: false, teaCount: 0, maxTea: 2 },
+                { name: '彭曉珍', barcode: '2025-0007-PENG-XIAOZHEN', checkedIn: false, teaCount: 0, maxTea: 2 }
+            ],
+            children: [
+                { name: '丁翊菲', barcode: '2025-0471-DING-YIFEI', checkedIn: false, cookieCount: 0, maxCookie: 2 },
+                { name: '丁翊庭', barcode: '2025-0472-DING-YITING', checkedIn: false, cookieCount: 0, maxCookie: 2 }
+            ]
+        };
+
+        // Firebase 資料操作 - 使用本地儲存作為備用方案
+        async function saveDataToFirebase() {
+            try {
+                // 先嘗試Firebase
+                const docRef = window.firestoreDoc(window.firebaseDB, "events", "mid-autumn-2025");
+                await window.firestoreSetDoc(docRef, { 
+                    people: people,
+                    lastUpdated: new Date().toISOString(),
+                    updateCount: (await getUpdateCount()) + 1
+                }, { merge: true });
+                console.log("資料已儲存到雲端");
+                updateFirebaseStatus("✅ 資料已成功儲存到雲端", "success");
+                
+                // 同時儲存到本地
+                localStorage.setItem('mid-autumn-2025-data', JSON.stringify({
+                    people: people,
+                    lastUpdated: new Date().toISOString()
+                }));
+            } catch (error) {
+                console.error("Firebase儲存失敗，使用本地儲存:", error);
+                // Firebase失敗時使用本地儲存
+                localStorage.setItem('mid-autumn-2025-data', JSON.stringify({
+                    people: people,
+                    lastUpdated: new Date().toISOString()
+                }));
+                updateFirebaseStatus("⚠️ 雲端儲存失敗，已改用本地儲存", "warning");
+            }
+        }
+
+        // 獲取更新次數
+        async function getUpdateCount() {
+            try {
+                const docRef = window.firestoreDoc(window.firebaseDB, "events", "mid-autumn-2025");
+                const docSnap = await window.firestoreGetDoc(docRef);
+                return docSnap.exists() ? (docSnap.data().updateCount || 0) : 0;
+            } catch (error) {
+                return 0;
+            }
+        }
+
+        // 測試Firebase連線
+        async function testFirebase() {
+            updateFirebaseStatus("🔄 正在測試Firebase連線...", "loading");
+            
+            try {
+                // 測試寫入
+                const testDoc = window.firestoreDoc(window.firebaseDB, "test", "connection");
+                await window.firestoreSetDoc(testDoc, {
+                    timestamp: new Date().toISOString(),
+                    test: "Firebase連線測試成功"
+                });
+                
+                // 測試讀取
+                const docSnap = await window.firestoreGetDoc(testDoc);
+                if (docSnap.exists()) {
+                    updateFirebaseStatus("✅ Firebase連線正常！資料可以正常讀寫", "success");
+                } else {
+                    updateFirebaseStatus("⚠️ 寫入成功但讀取失敗", "warning");
+                }
+            } catch (error) {
+                updateFirebaseStatus("❌ Firebase權限不足，已啟用本地儲存模式", "error");
+                console.log("Firebase錯誤詳情:", error);
+                
+                // 測試本地儲存
+                try {
+                    const testData = { test: "本地儲存測試", timestamp: new Date().toISOString() };
+                    localStorage.setItem('test-storage', JSON.stringify(testData));
+                    const retrieved = localStorage.getItem('test-storage');
+                    if (retrieved) {
+                        updateFirebaseStatus("📱 本地儲存功能正常，資料會保存在瀏覽器中", "warning");
+                    }
+                } catch (localError) {
+                    updateFirebaseStatus("❌ 本地儲存也失敗，請檢查瀏覽器設定", "error");
+                }
+            }
+        }
+
+        // 查看資料
+        async function viewFirebaseData() {
+            let info = "";
+            
+            // 嘗試讀取Firebase資料
+            try {
+                const docRef = window.firestoreDoc(window.firebaseDB, "events", "mid-autumn-2025");
+                const docSnap = await window.firestoreGetDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    info += `☁️ 雲端資料狀態：
+• 最後更新：${data.lastUpdated || '未知'}
+• 更新次數：${data.updateCount || 0}
+• 大人資料：${data.people?.adults?.length || 0} 筆
+• 小孩資料：${data.people?.children?.length || 0} 筆
+
+`;
+                } else {
+                    info += "☁️ 雲端尚無資料\n\n";
+                }
+            } catch (error) {
+                info += `☁️ 雲端讀取失敗: ${error.message}\n\n`;
+            }
+            
+            // 讀取本地資料
+            try {
+                const localData = localStorage.getItem('mid-autumn-2025-data');
+                if (localData) {
+                    const data = JSON.parse(localData);
+                    info += `📱 本地資料狀態：
+• 最後更新：${data.lastUpdated || '未知'}
+• 大人資料：${data.people?.adults?.length || 0} 筆
+• 小孩資料：${data.people?.children?.length || 0} 筆
+• 儲存大小：${(JSON.stringify(data).length / 1024).toFixed(2)} KB`;
+                } else {
+                    info += "📱 本地尚無資料";
+                }
+            } catch (error) {
+                info += `📱 本地讀取失敗: ${error.message}`;
+            }
+            
+            alert(info);
+        }
+
+        // 更新Firebase狀態顯示
+        function updateFirebaseStatus(message, type) {
+            const statusDiv = document.getElementById('firebaseStatus');
+            let bgColor = 'bg-gray-100';
+            let textColor = 'text-gray-700';
+            
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-green-100';
+                    textColor = 'text-green-700';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100';
+                    textColor = 'text-red-700';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-yellow-100';
+                    textColor = 'text-yellow-700';
+                    break;
+                case 'loading':
+                    bgColor = 'bg-blue-100';
+                    textColor = 'text-blue-700';
+                    break;
+            }
+            
+            statusDiv.innerHTML = `
+                <div class="text-lg font-semibold ${textColor}">${message}</div>
+                <div class="text-sm text-gray-500 mt-1">時間：${new Date().toLocaleString()}</div>
+            `;
+            statusDiv.className = `mb-4 p-4 rounded-lg ${bgColor}`;
+        }
+
+        async function loadDataFromFirebase() {
+            try {
+                // 先嘗試從Firebase載入
+                const docRef = window.firestoreDoc(window.firebaseDB, "events", "mid-autumn-2025");
+                const docSnap = await window.firestoreGetDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.people) {
+                        // 合併雲端資料，保持條碼不變
+                        data.people.adults.forEach((cloudPerson, index) => {
+                            if (people.adults[index]) {
+                                people.adults[index].checkedIn = cloudPerson.checkedIn;
+                                people.adults[index].teaCount = cloudPerson.teaCount;
+                            }
+                        });
+                        data.people.children.forEach((cloudPerson, index) => {
+                            if (people.children[index]) {
+                                people.children[index].checkedIn = cloudPerson.checkedIn;
+                                people.children[index].cookieCount = cloudPerson.cookieCount;
+                            }
+                        });
+                        console.log("雲端資料載入成功");
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error("Firebase載入失敗，嘗試本地儲存:", error);
+            }
+            
+            // Firebase失敗時嘗試本地儲存
+            try {
+                const localData = localStorage.getItem('mid-autumn-2025-data');
+                if (localData) {
+                    const data = JSON.parse(localData);
+                    if (data.people) {
+                        data.people.adults.forEach((localPerson, index) => {
+                            if (people.adults[index]) {
+                                people.adults[index].checkedIn = localPerson.checkedIn;
+                                people.adults[index].teaCount = localPerson.teaCount;
+                            }
+                        });
+                        data.people.children.forEach((localPerson, index) => {
+                            if (people.children[index]) {
+                                people.children[index].checkedIn = localPerson.checkedIn;
+                                people.children[index].cookieCount = localPerson.cookieCount;
+                            }
+                        });
+                        console.log("本地資料載入成功");
+                        updateFirebaseStatus("📱 已載入本地儲存的資料", "warning");
+                    }
+                }
+            } catch (error) {
+                console.error("本地儲存載入失敗:", error);
+            }
+        }
+
+        // 即時同步監聽
+        function setupRealtimeSync() {
+            const docRef = window.firestoreDoc(window.firebaseDB, "events", "mid-autumn-2025");
+            window.firestoreOnSnapshot(docRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    if (data.people) {
+                        // 更新本地資料
+                        data.people.adults.forEach((cloudPerson, index) => {
+                            if (people.adults[index]) {
+                                people.adults[index].checkedIn = cloudPerson.checkedIn;
+                                people.adults[index].teaCount = cloudPerson.teaCount;
+                            }
+                        });
+                        data.people.children.forEach((cloudPerson, index) => {
+                            if (people.children[index]) {
+                                people.children[index].checkedIn = cloudPerson.checkedIn;
+                                people.children[index].cookieCount = cloudPerson.cookieCount;
+                            }
+                        });
+                        // 重新渲染頁面
+                        renderAdultList();
+                        renderChildList();
+                        updateStatistics();
+                    }
+                }
+            });
+        }
+
+        // 初始化頁面
+        async function initializePage() {
+            // 等待Firebase初始化
+            setTimeout(async () => {
+                updateFirebaseStatus("🔄 正在初始化系統...", "loading");
+                try {
+                    await loadDataFromFirebase();
+                    renderAdultList();
+                    renderChildList();
+                    updateStatistics();
+                    
+                    // 嘗試設置即時同步
+                    try {
+                        setupRealtimeSync();
+                        updateFirebaseStatus("✅ 系統初始化完成，雲端同步已啟動", "success");
+                    } catch (syncError) {
+                        updateFirebaseStatus("📱 系統初始化完成，使用本地儲存模式", "warning");
+                    }
+                } catch (error) {
+                    updateFirebaseStatus("📱 系統初始化完成，使用本地儲存模式", "warning");
+                }
+            }, 1000);
+        }
+
+        // 渲染大人名單
+        function renderAdultList() {
+            const adultList = document.getElementById('adultList');
+            adultList.innerHTML = '';
+            
+            people.adults.forEach((person, index) => {
+                const personCard = document.createElement('div');
+                personCard.className = `border-2 rounded-lg p-4 transition-all ${person.checkedIn ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}`;
+                
+                personCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-gray-800">${person.name}</span>
+                        <span class="text-sm ${person.checkedIn ? 'text-green-600' : 'text-gray-500'}">
+                            ${person.checkedIn ? '✅ 已簽到' : '⏳ 未簽到'}
+                        </span>
+                    </div>
+                    <div class="bg-gray-100 rounded p-2 mb-2 text-center">
+                        <span class="text-xs text-gray-500">專屬條碼</span>
+                        <div class="font-mono text-lg font-bold text-blue-600">${person.barcode}</div>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-gray-600">🍵 青茶: ${person.teaCount}/${person.maxTea}</span>
+                        <button onclick="toggleCheckIn('adult', ${index})" 
+                                class="px-3 py-1 rounded text-sm font-medium transition-colors ${person.checkedIn ? 'bg-gray-300 text-gray-600' : 'bg-blue-500 text-white hover:bg-blue-600'}">
+                            ${person.checkedIn ? '取消簽到' : '簽到'}
+                        </button>
+                    </div>
+                    <button onclick="redeemTea(${index})" 
+                            class="w-full py-2 rounded font-medium transition-colors ${person.checkedIn && person.teaCount < person.maxTea ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
+                            ${!person.checkedIn || person.teaCount >= person.maxTea ? 'disabled' : ''}>
+                        🍵 領取青茶 (需刷流水號)
+                    </button>
+                `;
+                
+                adultList.appendChild(personCard);
+            });
+        }
+
+        // 渲染小孩名單
+        function renderChildList() {
+            const childList = document.getElementById('childList');
+            childList.innerHTML = '';
+            
+            people.children.forEach((person, index) => {
+                const personCard = document.createElement('div');
+                personCard.className = `border-2 rounded-lg p-4 transition-all ${person.checkedIn ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-gray-50'}`;
+                
+                personCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-gray-800">${person.name}</span>
+                        <span class="text-sm ${person.checkedIn ? 'text-green-600' : 'text-gray-500'}">
+                            ${person.checkedIn ? '✅ 已簽到' : '⏳ 未簽到'}
+                        </span>
+                    </div>
+                    <div class="bg-gray-100 rounded p-2 mb-2 text-center">
+                        <span class="text-xs text-gray-500">專屬條碼</span>
+                        <div class="font-mono text-lg font-bold text-orange-600">${person.barcode}</div>
+                    </div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-gray-600">🍪 餅乾: ${person.cookieCount}/${person.maxCookie}</span>
+                        <button onclick="toggleCheckIn('child', ${index})" 
+                                class="px-3 py-1 rounded text-sm font-medium transition-colors ${person.checkedIn ? 'bg-gray-300 text-gray-600' : 'bg-blue-500 text-white hover:bg-blue-600'}">
+                            ${person.checkedIn ? '取消簽到' : '簽到'}
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500 mb-2">需刷流水號簽到，再刷商品條碼2025-PROD-COOK-4515領餅乾</div>
+                `;
+                
+                childList.appendChild(personCard);
+            });
+        }
+
+        // 切換簽到狀態
+        function toggleCheckIn(type, index) {
+            if (type === 'adult') {
+                people.adults[index].checkedIn = !people.adults[index].checkedIn;
+                const personName = people.adults[index].name;
+                const message = people.adults[index].checkedIn ? `${personName} 報到成功` : '取消簽到';
+                showNotification(message, 'success', people.adults[index].checkedIn);
+            } else {
+                people.children[index].checkedIn = !people.children[index].checkedIn;
+                const personName = people.children[index].name;
+                const message = people.children[index].checkedIn ? `${personName} 報到成功` : '取消簽到';
+                showNotification(message, 'success', people.children[index].checkedIn);
+            }
+            
+            renderAdultList();
+            renderChildList();
+            updateStatistics();
+            saveDataToFirebase(); // 儲存到雲端
+        }
+
+        // 領取青茶
+        function redeemTea(index) {
+            const person = people.adults[index];
+            if (person.checkedIn && person.teaCount < person.maxTea) {
+                person.teaCount++;
+                showNotification(`${person.name} 領取成功`, 'success', true);
+                renderAdultList();
+                updateStatistics();
+                saveDataToFirebase(); // 儲存到雲端
+            }
+        }
+
+        // 掃描狀態管理
+        let scanState = {
+            waitingForProduct: false,
+            selectedPerson: null,
+            personType: null
+        };
+
+        // 條碼掃描
+        function scanBarcode() {
+            const barcodeInput = document.getElementById('barcodeInput');
+            const barcode = barcodeInput.value.trim();
+            
+            if (!barcode) {
+                showNotification('請輸入條碼！', 'error');
+                return;
+            }
+            
+            // 如果正在等待商品條碼
+            if (scanState.waitingForProduct) {
+                handleProductBarcode(barcode);
+                barcodeInput.value = '';
+                return;
+            }
+            
+            let found = false;
+            
+            // 檢查大人條碼 (簽到用)
+            people.adults.forEach((adult, index) => {
+                if (adult.barcode === barcode) {
+                    if (!adult.checkedIn) {
+                        adult.checkedIn = true;
+                        showNotification(`${adult.name} 報到成功`, 'success', true);
+                        found = true;
+                    } else {
+                        // 已簽到的大人可以直接領青茶
+                        if (adult.teaCount < adult.maxTea) {
+                            adult.teaCount++;
+                            showNotification(`${adult.name} 領取成功`, 'success', true);
+                        } else {
+                            showNotification(`${adult.name} 青茶已領完！`, 'error');
+                        }
+                        found = true;
+                    }
+                }
+            });
+            
+            // 檢查小孩條碼 (簽到用)
+            people.children.forEach((child, index) => {
+                if (child.barcode === barcode) {
+                    if (!child.checkedIn) {
+                        child.checkedIn = true;
+                        showNotification(`${child.name} 報到成功`, 'success', true);
+                        found = true;
+                    } else {
+                        // 已簽到的小孩需要等待商品條碼
+                        scanState.waitingForProduct = true;
+                        scanState.selectedPerson = child;
+                        scanState.personType = 'child';
+                        showNotification(`請掃描商品條碼 (2025-PROD-COOK-4515)`, 'success');
+                        found = true;
+                    }
+                }
+            });
+            
+            if (!found) {
+                showNotification('條碼不存在！請檢查條碼是否正確', 'error');
+            } else {
+                renderAdultList();
+                renderChildList();
+                updateStatistics();
+                saveDataToFirebase(); // 儲存到雲端
+            }
+            
+            barcodeInput.value = '';
+        }
+
+        // 處理商品條碼
+        function handleProductBarcode(barcode) {
+            if (barcode === '2025-PROD-COOK-4515' && scanState.personType === 'child') {
+                const child = scanState.selectedPerson;
+                if (child.cookieCount < child.maxCookie) {
+                    child.cookieCount++;
+                    showNotification(`${child.name} 領取成功`, 'success', true);
+                } else {
+                    showNotification(`${child.name} 餅乾已領完！`, 'error');
+                }
+            } else {
+                showNotification('商品條碼錯誤！', 'error');
+            }
+            
+            // 重置掃描狀態
+            scanState.waitingForProduct = false;
+            scanState.selectedPerson = null;
+            scanState.personType = null;
+            
+            renderAdultList();
+            renderChildList();
+            updateStatistics();
+            saveDataToFirebase();
+        }
+
+        // 更新統計資訊
+        function updateStatistics() {
+            const checkedInAdults = people.adults.filter(p => p.checkedIn).length;
+            const checkedInChildren = people.children.filter(p => p.checkedIn).length;
+            const totalCheckedIn = checkedInAdults + checkedInChildren;
+            
+            const totalTea = people.adults.reduce((sum, p) => sum + p.teaCount, 0);
+            const totalCookies = people.children.reduce((sum, p) => sum + p.cookieCount, 0);
+            
+            document.getElementById('checkedInCount').textContent = totalCheckedIn;
+            document.getElementById('teaRedeemed').textContent = totalTea;
+            document.getElementById('cookieRedeemed').textContent = totalCookies;
+        }
+
+        // TTS語音播報
+        function speakMessage(message) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 0.9;
+                utterance.pitch = 1.2;
+                utterance.volume = 1;
+                
+                // 選擇不同的語音
+                const voices = speechSynthesis.getVoices();
+                const femaleVoice = voices.find(voice => 
+                    voice.lang.includes('zh') && voice.name.includes('Female')
+                ) || voices.find(voice => 
+                    voice.lang.includes('zh') && voice.name.includes('女')
+                ) || voices.find(voice => voice.lang.includes('zh'));
+                
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'success', speak = false) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300 ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
+            
+            // 顯示通知
+            notification.style.transform = 'translateX(0)';
+            
+            // TTS播報
+            if (speak) {
+                speakMessage(message);
+            }
+            
+            // 3秒後隱藏
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+            }, 3000);
+        }
+
+        // 條碼輸入框按Enter鍵觸發掃描
+        document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                scanBarcode();
+            }
+        });
+
+        // 初始化頁面
+        initializePage();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989902a1656e8098',t:'MTc1OTYyNjMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
