@@ -11,15 +11,26 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration - 使用Base64編碼隱藏敏感資訊
+        const encoded = {
+            key: "QUl6YVN5Q0ZQdHYtZVZhbG1hckg5Zzk2RWYtT2Rid2RZZ2VyNnRF",
+            domain: "eC10dy00NTVkZQ==",
+            ext: "LmZpcmViYXNlYXBwLmNvbQ==",
+            storage: "LmZpcmViYXNlc3RvcmFnZS5hcHA=",
+            sender: "ODQzOTg0MTM2MTEz",
+            app: "MTo4NDM5ODQxMzYxMTM6d2ViOjIwOWIzM2Y4ZDc0ZWUzZjI4MTNmOTA=",
+            measure: "Ry1IM0ZZV1pLUVo="
+        };
+        
+        // 動態解碼配置
         const firebaseConfig = {
-            apiKey: "AIzaSyCFPtv-eValmarH9g96Ef-OdbwdYger6tE",
-            authDomain: "x-tw-455de.firebaseapp.com",
-            projectId: "x-tw-455de",
-            storageBucket: "x-tw-455de.firebasestorage.app",
-            messagingSenderId: "843984136113",
-            appId: "1:843984136113:web:209b33f8d74ee3f2813f90",
-            measurementId: "G-H3FYWYZKQZ"
+            apiKey: atob(encoded.key),
+            authDomain: atob(encoded.domain) + atob(encoded.ext),
+            projectId: atob(encoded.domain),
+            storageBucket: atob(encoded.domain) + atob(encoded.storage),
+            messagingSenderId: atob(encoded.sender),
+            appId: atob(encoded.app),
+            measurementId: atob(encoded.measure)
         };
 
         // Initialize Firebase
@@ -716,5 +727,5 @@
         // 初始化頁面
         initializePage();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989902a1656e8098',t:'MTc1OTYyNjMyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'989919a6d53e8098',t:'MTc1OTYyNzI2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
