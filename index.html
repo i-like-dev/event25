@@ -11,7 +11,7 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-        // Firebase configuration - 使用Base64編碼隱藏敏感資訊
+        
         const encoded = {
             key: "QUl6YVN5Q0ZQdHYtZVZhbG1hckg5Zzk2RWYtT2Rid2RZZ2VyNnRF",
             domain: "eC10dy00NTVkZQ==",
@@ -84,7 +84,7 @@
             <!-- 大人名單 -->
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
-                    👨‍👩‍👧‍👦 大人 (青茶 x2，需刷流水號)
+                    👨‍👩‍👧‍👦 大人 (烏龍冰茶 x2，需刷流水號)
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3" id="adultList">
                     <!-- 大人名單將由JavaScript生成 -->
@@ -111,7 +111,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h2M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"></path>
                     </svg>
                     <p class="text-gray-600">掃描流水號條碼進行簽到或領取贈品</p>
-                    <p class="text-sm text-gray-500 mt-1">大人：刷流水號簽到，再刷一次領青茶 | 小孩：刷流水號簽到，再刷商品條碼2025-PROD-COOK-4515領餅乾</p>
+                    <p class="text-sm text-gray-500 mt-1">大人：刷流水號簽到，再刷一次領烏龍冰茶 | 小孩：刷流水號簽到，再刷商品條碼2025-PROD-COOK-4515領餅乾</p>
                 </div>
                 <input type="text" id="barcodeInput" placeholder="輸入條碼 (如：2025-0001-DING-LIWEN) 或商品條碼 2025-PROD-COOK-4515" 
                        class="w-full max-w-md mx-auto px-4 py-3 border-2 border-gray-300 rounded-lg text-center text-lg focus:border-indigo-500 focus:outline-none">
@@ -131,7 +131,7 @@
                 </div>
                 <div class="bg-blue-50 p-4 rounded-lg">
                     <div class="text-2xl font-bold text-blue-600" id="teaRedeemed">0</div>
-                    <div class="text-sm text-gray-600">青茶已領</div>
+                    <div class="text-sm text-gray-600">烏龍冰茶茶已領</div>
                 </div>
                 <div class="bg-orange-50 p-4 rounded-lg">
                     <div class="text-2xl font-bold text-orange-600" id="cookieRedeemed">0</div>
@@ -470,7 +470,7 @@
                         <div class="font-mono text-lg font-bold text-blue-600">${person.barcode}</div>
                     </div>
                     <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm text-gray-600">🍵 青茶: ${person.teaCount}/${person.maxTea}</span>
+                        <span class="text-sm text-gray-600">🍵 烏龍冰茶: ${person.teaCount}/${person.maxTea}</span>
                         <button onclick="toggleCheckIn('adult', ${index})" 
                                 class="px-3 py-1 rounded text-sm font-medium transition-colors ${person.checkedIn ? 'bg-gray-300 text-gray-600' : 'bg-blue-500 text-white hover:bg-blue-600'}">
                             ${person.checkedIn ? '取消簽到' : '簽到'}
@@ -479,7 +479,7 @@
                     <button onclick="redeemTea(${index})" 
                             class="w-full py-2 rounded font-medium transition-colors ${person.checkedIn && person.teaCount < person.maxTea ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
                             ${!person.checkedIn || person.teaCount >= person.maxTea ? 'disabled' : ''}>
-                        🍵 領取青茶 (需刷流水號)
+                        🍵 領取烏龍冰茶 (需刷流水號)
                     </button>
                 `;
                 
@@ -592,7 +592,7 @@
                             adult.teaCount++;
                             showNotification(`${adult.name} 領取成功`, 'success', true);
                         } else {
-                            showNotification(`${adult.name} 青茶已領完！`, 'error');
+                            showNotification(`${adult.name} 烏龍冰茶茶已領完！`, 'error');
                         }
                         found = true;
                     }
